@@ -15,8 +15,7 @@ exports.generateToken = (id) => {
 exports.verifyToken = (token) => {
   try {
     return jwt.verify(token, process.env.JWT_SECRET);
-  }
-  catch (err) {
+  } catch (err) {
     console.error(err);
     return null;
   }
