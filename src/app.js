@@ -7,7 +7,7 @@ const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const hpp = require("hpp");
-
+const cookieParser = require("cookie-parser");
 //: ******* ROUTE HANDLERS *******
 const AppError = require("./api/utils/AppError");
 const globalErrorHandler = require("./api/controllers/errorController");
@@ -15,6 +15,7 @@ const filmRouter = require("./api/routes/filmRoutes");
 const categoriesRouter = require("./api/routes/categoriesRoutes");
 const countriesRouter = require("./api/routes/countriesRoutes");
 const testRouter = require("./api/routes/testRoutes");
+const userRouter = require("./api/routes/userRoutes");
 
 //: ******* START EXPRESS APP *******
 const app = express();
@@ -52,6 +53,9 @@ app.use(mongoSanitize());
 // 8) Data sanitization against XSS
 app.use(xss());
 
+// 9) Cookie parser
+app.use(cookieParser()); 
+
 //: >>>>>>> END GLOBAL MIDDLEWARE >>>>>>>
 
 //: ******* ROUTES *******
@@ -59,6 +63,7 @@ app.use("/api/v1/test", testRouter);
 app.use("/api/v1/films", filmRouter);
 app.use("/api/v1/categories", categoriesRouter);
 app.use("/api/v1/countries", countriesRouter);
+app.use("/api/v1/users", userRouter);
 
 //: ******* ERROR HANDLING *******
 // 1) Handle unhandled routes
