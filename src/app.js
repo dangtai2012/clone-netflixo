@@ -14,7 +14,6 @@ const globalErrorHandler = require("./api/controllers/errorController");
 const filmRouter = require("./api/routes/filmRoutes");
 const categoriesRouter = require("./api/routes/categoriesRoutes");
 const countriesRouter = require("./api/routes/countriesRoutes");
-const testRouter = require("./api/routes/testRoutes");
 const userRouter = require("./api/routes/userRoutes");
 const reviewRouter = require("./api/routes/reviewRoutes");
 
@@ -60,7 +59,6 @@ app.use(cookieParser());
 //: >>>>>>> END GLOBAL MIDDLEWARE >>>>>>>
 
 //: ******* ROUTES *******
-app.use("/api/v1/test", testRouter);
 app.use("/api/v1/films", filmRouter);
 app.use("/api/v1/categories", categoriesRouter);
 app.use("/api/v1/countries", countriesRouter);
