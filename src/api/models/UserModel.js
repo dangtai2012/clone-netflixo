@@ -49,7 +49,11 @@ const userSchema = new Schema(
         message: "Passwords are not the same!",
       },
     },
-    image_url: { type: String },
+    image_url: {
+      type: String,
+      default:
+        "https://res.cloudinary.com/dexkjvage/image/upload/v1714673702/z727dnpbfhsrk5ggyzpb.png",
+    },
     wallet: {
       type: Number,
       required: true,
@@ -119,4 +123,4 @@ userSchema.methods.createPasswordResetToken = function () {
   return resetToken;
 };
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model("users", userSchema);
