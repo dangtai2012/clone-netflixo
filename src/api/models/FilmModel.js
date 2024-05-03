@@ -115,8 +115,14 @@ const filmSchema = new mongoose.Schema(
 // Virtual populate
 filmSchema.virtual("episodes", {
   ref: "episodes",
-  foreignField: "_id",
-  localField: "film_id",
+  foreignField: "film_id",
+  localField: "_id",
+});
+
+filmSchema.virtual("reviews", {
+  ref: "reviews",
+  foreignField: "film",
+  localField: "_id",
 });
 
 const Film = mongoose.model("films", filmSchema);

@@ -2,6 +2,7 @@ const Film = require("../models/FilmModel");
 const Countries = require("../models/CountriesModel");
 const Categories = require("../models/CategoriesModel");
 const Episodes = require("../models/EpisodeModel");
+const Review = require("../models/ReviewModel");
 const AppError = require("../utils/AppError");
 const catchAsync = require("../utils/catchAsync");
 
@@ -79,12 +80,14 @@ exports.getFilms = catchAsync(async (req, res, next) => {
 // @access Public
 
 exports.getFilmBySlug = catchAsync(async (req, res, next) => {
-  const projection = { __v: 0 };
+  const projection = {
+    film: 0,
+    __v: 0,
+  };
 
   const film = await Film.findOne({ slug: req.params.slug }, projection)
     .populate("categories", "-__v")
-    .populate("countries", "-__v")
-    .exec();
+    .populate("countries", "-__v");
 
   if (!film) {
     return next(new AppError("No film found", 404));
@@ -92,6 +95,9 @@ exports.getFilmBySlug = catchAsync(async (req, res, next) => {
 
   const episodes = await Episodes.find({ film_id: film._id }, projection);
   film.episodes = episodes;
+
+  const reviews = await Review.find({ film: film._id }, projection);
+  film.reviews = reviews;
 
   res.status(200).json({
     status: "success",
@@ -104,12 +110,14 @@ exports.getFilmBySlug = catchAsync(async (req, res, next) => {
 // @access Public
 
 exports.getFilmById = catchAsync(async (req, res, next) => {
-  const projection = { __v: 0 };
+  const projection = {
+    film: 0,
+    __v: 0,
+  };
 
   const film = await Film.findById(req.params.id, projection)
     .populate("categories", "-__v")
-    .populate("countries", "-__v")
-    .exec();
+    .populate("countries", "-__v");
 
   if (!film) {
     return next(new AppError("No film found", 404));
@@ -117,6 +125,9 @@ exports.getFilmById = catchAsync(async (req, res, next) => {
 
   const episodes = await Episodes.find({ film_id: film._id }, projection);
   film.episodes = episodes;
+
+  const reviews = await Review.find({ film: film._id }, projection);
+  film.reviews = reviews;
 
   res.status(200).json({
     status: "success",

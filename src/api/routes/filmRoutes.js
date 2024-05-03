@@ -1,7 +1,11 @@
 const express = require("express");
 const filmController = require("../controllers/filmController");
+const reviewRouter = require("./reviewRoutes");
 
 const router = express.Router();
+
+// redirect to review router
+router.use("/:filmId/reviews", reviewRouter);
 
 // ************ PUBLIC ROUTES ************
 
