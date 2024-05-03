@@ -184,6 +184,18 @@ exports.protect = catchAsync(async (req, res, next) => {
   next();
 });
 
+exports.restrictTo =
+  (...roles) =>
+  (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError("You do not have permission to perform this action", 403)
+      );
+    }
+
+    next();
+  };
+
 exports.updatePassword = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user._id).select("+password");
   if (!(await user.correctPassword(req.body.currentPassword, user.password))) {
@@ -205,6 +217,19 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
     message: "Password updated successfully",
     data: {
       token,
+    },
+  });
+});
+
+exports.getUser = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    return next(new AppError("User not found", 404));
+  }
+  res.status(200).json({
+    status: "success",
+    data: {
+      user,
     },
   });
 });
