@@ -16,6 +16,7 @@ const categoriesRouter = require("./api/routes/categoriesRoutes");
 const countriesRouter = require("./api/routes/countriesRoutes");
 const testRouter = require("./api/routes/testRoutes");
 const userRouter = require("./api/routes/userRoutes");
+const reviewRouter = require("./api/routes/reviewRoutes");
 
 //: ******* START EXPRESS APP *******
 const app = express();
@@ -46,7 +47,6 @@ app.use("/api", limiter);
 // 6) Body parser, reading data from body into req.body
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 
 // 7) Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
@@ -55,7 +55,7 @@ app.use(mongoSanitize());
 app.use(xss());
 
 // 9) Cookie parser
-app.use(cookieParser()); 
+app.use(cookieParser());
 
 //: >>>>>>> END GLOBAL MIDDLEWARE >>>>>>>
 
@@ -65,6 +65,7 @@ app.use("/api/v1/films", filmRouter);
 app.use("/api/v1/categories", categoriesRouter);
 app.use("/api/v1/countries", countriesRouter);
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/reviews", reviewRouter);
 
 //: ******* ERROR HANDLING *******
 // 1) Handle unhandled routes
