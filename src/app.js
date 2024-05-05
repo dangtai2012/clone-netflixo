@@ -25,12 +25,13 @@ app.enable("trust proxy");
 //: >>>>>>> START GLOBAL MIDDLEWARE >>>>>>>
 // 1) cors
 app.use(cors());
+app.options("*", cors());
 
 // 2) Serving static files
 app.use(express.static(path.join(__dirname, "api/public")));
 
 // 3) helmet
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false }));
 
 // 4) Development logging
 if (process.env.NODE_ENV === "development") {
