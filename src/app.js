@@ -20,8 +20,6 @@ const reviewRouter = require("./api/routes/reviewRoutes");
 //: ******* START EXPRESS APP *******
 const app = express();
 
-app.enable("trust proxy");
-
 //: >>>>>>> START GLOBAL MIDDLEWARE >>>>>>>
 // 1) cors
 app.use(cors());
