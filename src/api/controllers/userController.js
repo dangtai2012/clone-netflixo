@@ -10,6 +10,10 @@ const crypto = require("crypto");
 const { promisify } = require("util");
 const jwt = require("jsonwebtoken");
 
+// @desc    Register a new user
+// @route   POST /api/v1/users/register
+// @access  Public
+
 exports.registerUser = catchAsync(async (req, res, next) => {
   const requiredFields = [
     "first_name",
@@ -37,6 +41,9 @@ exports.registerUser = catchAsync(async (req, res, next) => {
   });
 });
 
+// @desc    Log in a user
+// @route   POST /api/v1/users/login
+// @access  Public
 exports.loginUser = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -50,7 +57,7 @@ exports.loginUser = catchAsync(async (req, res, next) => {
     return next(new AppError("User not verified", 401));
   }
   delete user._doc.password;
-  const token = generateToken(user);
+  const token = generateToken(user._id);
 
   res.cookie("jwt", token, {
     expires: new Date(
@@ -69,6 +76,9 @@ exports.loginUser = catchAsync(async (req, res, next) => {
   });
 });
 
+// @desc    Log out a user
+// @route   GET /api/v1/users/logout
+// @access  Private
 exports.logout = async (req, res) => {
   res.cookie("jwt", "loggedOut", {
     expires: new Date(Date.now() + 10 * 1000),
@@ -79,6 +89,10 @@ exports.logout = async (req, res) => {
     status: "success",
   });
 };
+
+// @desc    Verify a user
+// @route   GET /api/v1/users/verify/:token
+// @access  Public
 
 exports.verifyUser = catchAsync(async (req, res, next) => {
   const { token } = req.params;
@@ -103,6 +117,10 @@ exports.verifyUser = catchAsync(async (req, res, next) => {
   });
 });
 
+// @desc    Forgot password
+// @route   POST /api/v1/users/forgotPassword
+// @access  Public
+
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
@@ -123,6 +141,10 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     );
   }
 });
+
+// @desc    Reset password
+// @route   GET /api/v1/users/resetPassword/:token
+// @access  Public
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
   const token = crypto
@@ -157,6 +179,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
 exports.protect = catchAsync(async (req, res, next) => {
   const testToken = req.headers.authorization;
+
   let token;
   if (testToken && testToken.startsWith("Bearer")) {
     token = testToken.split(" ")[1];
@@ -196,11 +219,15 @@ exports.restrictTo =
     next();
   };
 
+// @desc    Update password
+// @route   PATCH /api/v1/users/updatePassword
+// @access  Private
 exports.updatePassword = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user._id).select("+password");
+  const user = await User.findById(req.user.id).select("+password");
   if (!(await user.correctPassword(req.body.currentPassword, user.password))) {
     return next(new AppError("Incorrect password", 401));
   }
+
   user.password = req.body.password;
   user.passwordConfirm = req.body.passwordConfirm;
   await user.save();
@@ -221,11 +248,92 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   });
 });
 
+// @desc    Get user
+// @route   GET /api/v1/users/me
+// @access  Private
 exports.getUser = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id);
   if (!user) {
     return next(new AppError("User not found", 404));
   }
+  res.status(200).json({
+    status: "success",
+    data: {
+      user,
+    },
+  });
+});
+
+// @desc    Update user
+// @route   PATCH /api/v1/users/updateMe
+// @access  Private
+exports.updateUser = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    return next(new AppError("User not found", 404));
+  }
+  const allowedFields = ["first_name", "last_name", "email"];
+  Object.keys(req.body).forEach((field) => {
+    if (allowedFields.includes(field)) {
+      user[field] = req.body[field];
+    }
+  });
+  if (req.file) {
+    user.image_url = req.file.path;
+  }
+  await user.save();
+  res.status(200).json({
+    status: "success",
+    data: {
+      user,
+    },
+  });
+});
+
+// @desc    Add to favorites
+// @route   PATCH /api/v1/users/favorites/:filmId
+// @access  Private
+exports.addToFavorites = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    return next(new AppError("User not found", 404));
+  }
+  if (user.favorite.includes(req.params.filmId)) {
+    return next(new AppError("Film already in favorites", 400));
+  }
+  user.favorite.push(req.params.filmId);
+  await user.save();
+  res.status(200).json({
+    status: "success",
+    data: {
+      user,
+    },
+  });
+});
+
+exports.getFavorites = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id).populate("favorite");
+  if (!user) {
+    return next(new AppError("User not found", 404));
+  }
+  res.status(200).json({
+    status: "success",
+    data: {
+      user,
+    },
+  });
+});
+
+exports.removeFromFavorites = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    return next(new AppError("User not found", 404));
+  }
+  if (!user.favorite.includes(req.params.filmId)) {
+    return next(new AppError("Film not in favorites", 400));
+  }
+  user.favorite = user.favorite.filter((film) => film != req.params.filmId);
+  await user.save();
   res.status(200).json({
     status: "success",
     data: {
