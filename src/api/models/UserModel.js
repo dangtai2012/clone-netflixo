@@ -36,11 +36,18 @@ const userSchema = new Schema(
         message: (props) => `${props.value} is not a valid email!`,
       },
     },
-
+    favorite: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "films",
+      },
+    ],
     password: { type: String, required: true, select: false },
     passwordConfirm: {
       type: String,
-      required: [true, "Please confirm your password"],
+      required: function () {
+        return this.isNew;
+      },
       validate: {
         // This only works on CREATE and SAVE!!!
         validator: function (el) {

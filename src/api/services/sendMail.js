@@ -11,7 +11,7 @@ exports.sendMail = async (options) => {
   });
   // 2) Define the email options
   const mailOptions = {
-    from: "Netflix verify account <support@nextfix.com>",
+    from: "Netflix clone <support@nextfix.com>",
     to: options.email,
     subject: options.subject,
     html: options.message,
